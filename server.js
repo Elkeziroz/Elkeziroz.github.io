@@ -2,26 +2,20 @@ const { createServer } = require('http');
 const { parse } = require('url');
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const next = require('next');
 
-const nextBuildDir = path.join(__dirname, '.next');
-if (!fs.existsSync(nextBuildDir)) {
-  console.log('> Compilando versión de producción con Next.js...');
-  try {
-    execSync('node ./node_modules/next/dist/bin/next build', { stdio: 'inherit' });
-    console.log('> Compilación de producción completada con éxito.');
-  } catch (err) {
-    console.error('> Error durante la compilación de Next.js:', err.message || err);
-    process.exit(1);
-  }
+// Detección automática: si existe compilación previa usa Producción, sino usa Modo Dinámico sin fallar
+const isProduction = fs.existsSync(path.join(__dirname, '.next', 'BUILD_ID'));
+const dev = !isProduction;
+
+if (isProduction) {
+  process.env.NODE_ENV = 'production';
 }
 
-process.env.NODE_ENV = 'production';
-const next = require('next');
 const hostname = '0.0.0.0';
 const port = parseInt(process.env.PORT || process.env.SERVER_PORT || '3000', 10);
 
-const app = next({ dev: false, hostname, port });
+const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
@@ -36,6 +30,6 @@ app.prepare().then(() => {
     }
   }).listen(port, (err) => {
     if (err) throw err;
-    console.log(`> Next.js Miyobi Web Producción activo en http://${hostname}:${port}`);
+    console.log(`> Next.js Miyobi Web Servidor activo en http://${hostname}:${port} (Modo: ${isProduction ? 'Producción' : 'Dinámico'})`);
   });
 });
