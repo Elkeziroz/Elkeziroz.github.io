@@ -22,11 +22,12 @@ function loadEnv(envPath) {
 loadEnv(path.join(__dirname, '.env.local'));
 loadEnv(path.join(__dirname, '.env'));
 
-// Variables por defecto de NextAuth / Discord
+// Sobrescribir AUTH_URL y NEXTAUTH_URL a tu dominio real miyobi.net en lugar de localhost:3000
+process.env.AUTH_URL = 'https://miyobi.net';
+process.env.NEXTAUTH_URL = 'https://miyobi.net';
 process.env.AUTH_DISCORD_ID = process.env.AUTH_DISCORD_ID || '1532557308935012443';
 process.env.AUTH_DISCORD_SECRET = process.env.AUTH_DISCORD_SECRET || 'q8RMiqqNiVBhPNtJ156-GO49okgdhI6A';
 process.env.AUTH_SECRET = process.env.AUTH_SECRET || '51ffa308e6b7950bca1dcac69671e1a0e78d3ecb0396317e3cbbf0be0b3c838c';
-process.env.NEXTAUTH_SECRET = process.env.AUTH_SECRET;
 process.env.AUTH_TRUST_HOST = 'true';
 
 // 1. Auto-descompresión de paquete Standalone si existe next_standalone.zip
