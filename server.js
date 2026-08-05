@@ -2,16 +2,19 @@ const { createServer } = require('http');
 const { parse } = require('url');
 const fs = require('fs');
 const path = require('path');
-const next = require('next');
 
-// Detección automática: si existe compilación previa usa Producción, sino usa Modo Dinámico sin fallar
-const isProduction = fs.existsSync(path.join(__dirname, '.next', 'BUILD_ID'));
-const dev = !isProduction;
+// Verificar si existe la carpeta de compilación estática de producción
+const hasBuild = fs.existsSync(path.join(__dirname, '.next', 'BUILD_ID'));
 
-if (isProduction) {
+if (!hasBuild) {
+  // Eliminar NODE_ENV=production para permitir que Next.js levante el servidor dinámico sin exigir BUILD_ID
+  delete process.env.NODE_ENV;
+} else {
   process.env.NODE_ENV = 'production';
 }
 
+const dev = !hasBuild;
+const next = require('next');
 const hostname = '0.0.0.0';
 const port = parseInt(process.env.PORT || process.env.SERVER_PORT || '3000', 10);
 
@@ -30,6 +33,6 @@ app.prepare().then(() => {
     }
   }).listen(port, (err) => {
     if (err) throw err;
-    console.log(`> Next.js Miyobi Web Servidor activo en http://${hostname}:${port} (Modo: ${isProduction ? 'Producción' : 'Dinámico'})`);
+    console.log(`> Next.js Miyobi Web Servidor activo en http://${hostname}:${port} (Modo: ${dev ? 'Dinámico (Sin Build)' : 'Producción (Compilado)'})`);
   });
 });
