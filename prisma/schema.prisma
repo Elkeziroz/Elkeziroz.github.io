@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Player {
+  id            String       @id @default(cuid())
+  username      String       @unique
+  uuid          String
+  isOnline      Boolean      @default(false)
+  currentServer String?      @default("Lobby")
+  ipAddress     String?
+  kills         Int          @default(0)
+  deaths        Int          @default(0)
+  coins         Float        @default(0)
+  votes         Int          @default(0)
+  playtime      String?      @default("0h")
+  firstJoin     DateTime     @default(now())
+  lastLogin     DateTime     @default(now())
+  punishments   Punishment[]
+}
+
+model Punishment {
+  id        String   @id @default(cuid())
+  type      String   // BAN, MUTE, KICK, WARN
+  reason    String
+  duration  String?  // e.g., "7d", "permanent"
+  staff     String
+  createdAt DateTime @default(now())
+  active    Boolean  @default(true)
+  playerId  String
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+}
+
+model SanctionQueue {
+  id        String   @id @default(cuid())
+  username  String
+  uuid      String?
+  type      String   // BAN, MUTE, KICK, WARN
+  reason    String
+  duration  String?
+  issuedBy  String
+  executed  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model ServerHeartbeat {
+  serverKey   String   @id
+  name        String
+  isOnline    Boolean  @default(true)
+  playerCount Int      @default(0)
+  maxPlayers  Int      @default(500)
+  ramUsage    String?
+  updatedAt   DateTime @updatedAt
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  image       String?
+  date        DateTime
+  active      Boolean   @default(true)
+  featured    Boolean   @default(false)
+  discordUrl  String?
+  rewards     String?
+  publishAt   DateTime?
+  endAt       DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model StaffNotice {
+  id          String           @id @default(cuid())
+  title       String
+  message     String
+  author      String
+  authorId    String?
+  authorImage String?
+  authorRole  String?
+  createdAt   DateTime         @default(now())
+  reactions   NoticeReaction[]
+  comments    NoticeComment[]
+}
+
+model NoticeReaction {
+  id        String      @id @default(cuid())
+  type      String
+  userId    String
+  noticeId  String
+  createdAt DateTime    @default(now())
+  notice    StaffNotice @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+}
+
+model NoticeComment {
+  id          String      @id @default(cuid())
+  message     String
+  userId      String
+  author      String
+  authorId    String?
+  authorImage String?
+  authorRole  String?
+  noticeId    String
+  createdAt   DateTime    @default(now())
+  notice      StaffNotice @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+}
+
+model StaffTask {
+  id               String   @id @default(cuid())
+  title            String
+  description      String
+  assignedTo       String
+  assignedToAvatar String?
+  assignedToRole   String?
+  assignedBy       String
+  status           String   @default("PENDING")
+  priority         String   @default("NORMAL")
+  createdAt        DateTime @default(now())
+}
+
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model StaffApplication {
+  id            String   @id @default(cuid())
+  minecraftName String
+  discordTag    String
+  discordId     String?
+  email         String?
+  age           Int
+  country       String
+  roleApplying  String
+  experience    String
+  hoursPerDay   String
+  whyJoin       String
+  scenarioAns   String
+  answersJson   String?
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+}
