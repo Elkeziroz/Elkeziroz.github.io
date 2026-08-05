@@ -1,10 +1,33 @@
 const path = require('path');
 const fs = require('fs');
 
-// Cargar variables de entorno predeterminadas para Auth.js / NextAuth
-process.env.AUTH_SECRET = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || 'miyobi-secret-key-2026-super-secure-key';
+// Cargar variables de .env y .env.local
+function loadEnv(envPath) {
+  if (fs.existsSync(envPath)) {
+    const envConfig = fs.readFileSync(envPath, 'utf8');
+    envConfig.split(/\r?\n/).forEach(line => {
+      const match = line.match(/^\s*([\w.-]+)\s*=\s*["']?(.*?)["']?\s*$/);
+      if (match) {
+        const key = match[1];
+        let val = match[2];
+        if (val.endsWith('"') || val.endsWith("'")) val = val.slice(0, -1);
+        if (!process.env[key]) {
+          process.env[key] = val;
+        }
+      }
+    });
+  }
+}
+
+loadEnv(path.join(__dirname, '.env.local'));
+loadEnv(path.join(__dirname, '.env'));
+
+// Variables por defecto de NextAuth / Discord
+process.env.AUTH_DISCORD_ID = process.env.AUTH_DISCORD_ID || '1532557308935012443';
+process.env.AUTH_DISCORD_SECRET = process.env.AUTH_DISCORD_SECRET || 'q8RMiqqNiVBhPNtJ156-GO49okgdhI6A';
+process.env.AUTH_SECRET = process.env.AUTH_SECRET || '51ffa308e6b7950bca1dcac69671e1a0e78d3ecb0396317e3cbbf0be0b3c838c';
 process.env.NEXTAUTH_SECRET = process.env.AUTH_SECRET;
-process.env.NEXTAUTH_URL = process.env.NEXTAUTH_URL || 'http://localhost:' + (process.env.PORT || process.env.SERVER_PORT || '25584');
+process.env.AUTH_TRUST_HOST = 'true';
 
 // 1. Auto-descompresión de paquete Standalone si existe next_standalone.zip
 const zipPath = path.join(__dirname, 'next_standalone.zip');
@@ -30,7 +53,6 @@ if (fs.existsSync(standaloneServer)) {
   console.log(`> Iniciando Next.js Standalone Ultra-Ligero en puerto ${process.env.PORT}...`);
   require(standaloneServer);
 } else {
-  // Fallback si aún no ha terminado de extraer
   const { createServer } = require('http');
   const { parse } = require('url');
   delete process.env.NODE_ENV;
