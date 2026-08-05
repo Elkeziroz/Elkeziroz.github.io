@@ -4,21 +4,20 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-process.env.NODE_ENV = 'production';
-
-// 1. Verificar y compilar ANTES de inicializar Next.js
+// 1. Compilar automáticamente usando la ruta directa de node_modules
 const nextBuildDir = path.join(__dirname, '.next');
 if (!fs.existsSync(nextBuildDir)) {
-  console.log('> No se encontró la carpeta .next compilada. Compilando Next.js ahora...');
+  console.log('> Compilando producción con Next.js...');
   try {
-    execSync('npx prisma generate && npx next build', { stdio: 'inherit', env: process.env });
+    execSync('./node_modules/.bin/prisma generate', { stdio: 'inherit' });
+    execSync('./node_modules/.bin/next build', { stdio: 'inherit' });
     console.log('> Compilación completada con éxito.');
   } catch (err) {
-    console.error('> Error compilando Next.js:', err);
+    console.error('> Error durante la compilación:', err.message);
   }
 }
 
-// 2. Inicializar Next.js en modo producción
+process.env.NODE_ENV = 'production';
 const next = require('next');
 const hostname = '0.0.0.0';
 const port = parseInt(process.env.PORT || process.env.SERVER_PORT || '3000', 10);
