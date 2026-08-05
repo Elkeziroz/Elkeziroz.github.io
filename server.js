@@ -28,13 +28,14 @@ process.env.NEXTAUTH_URL = 'https://miyobi.net';
 process.env.AUTH_DISCORD_ID = process.env.AUTH_DISCORD_ID || '1532557308935012443';
 process.env.AUTH_DISCORD_SECRET = process.env.AUTH_DISCORD_SECRET || 'q8RMiqqNiVBhPNtJ156-GO49okgdhI6A';
 process.env.AUTH_SECRET = process.env.AUTH_SECRET || '51ffa308e6b7950bca1dcac69671e1a0e78d3ecb0396317e3cbbf0be0b3c838c';
+process.env.NEXTAUTH_SECRET = process.env.AUTH_SECRET;
 process.env.AUTH_TRUST_HOST = 'true';
 
 // 1. Auto-descompresión de paquete Standalone si existe next_standalone.zip
 const zipPath = path.join(__dirname, 'next_standalone.zip');
 const standaloneServer = path.join(__dirname, '.next', 'standalone', 'server.js');
 
-if (fs.existsSync(zipPath) && !fs.existsSync(standaloneServer)) {
+if (fs.existsSync(zipPath)) {
   console.log('> Descomprimiendo servidor Standalone de producción (next_standalone.zip)...');
   try {
     const AdmZip = require('adm-zip');
