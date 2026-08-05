@@ -1,12 +1,29 @@
 const { createServer } = require('http');
 const { parse } = require('url');
-const next = require('next');
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
 
-const dev = process.env.NODE_ENV !== 'production';
+process.env.NODE_ENV = 'production';
+
+// 1. Verificar y compilar ANTES de inicializar Next.js
+const nextBuildDir = path.join(__dirname, '.next');
+if (!fs.existsSync(nextBuildDir)) {
+  console.log('> No se encontró la carpeta .next compilada. Compilando Next.js ahora...');
+  try {
+    execSync('npx prisma generate && npx next build', { stdio: 'inherit', env: process.env });
+    console.log('> Compilación completada con éxito.');
+  } catch (err) {
+    console.error('> Error compilando Next.js:', err);
+  }
+}
+
+// 2. Inicializar Next.js en modo producción
+const next = require('next');
 const hostname = '0.0.0.0';
 const port = parseInt(process.env.PORT || process.env.SERVER_PORT || '3000', 10);
 
-const app = next({ dev, hostname, port });
+const app = next({ dev: false, hostname, port });
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
@@ -21,6 +38,6 @@ app.prepare().then(() => {
     }
   }).listen(port, (err) => {
     if (err) throw err;
-    console.log(`> Next.js Miyobi Web Servidor activo en http://${hostname}:${port}`);
+    console.log(`> Next.js Miyobi Web Producción activo en http://${hostname}:${port}`);
   });
 });
