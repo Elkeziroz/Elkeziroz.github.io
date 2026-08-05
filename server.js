@@ -4,16 +4,15 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-// 1. Compilar automáticamente usando la ruta directa de node_modules
 const nextBuildDir = path.join(__dirname, '.next');
 if (!fs.existsSync(nextBuildDir)) {
-  console.log('> Compilando producción con Next.js...');
+  console.log('> Compilando versión de producción con Next.js...');
   try {
-    execSync('./node_modules/.bin/prisma generate', { stdio: 'inherit' });
-    execSync('./node_modules/.bin/next build', { stdio: 'inherit' });
-    console.log('> Compilación completada con éxito.');
+    execSync('node ./node_modules/next/dist/bin/next build', { stdio: 'inherit' });
+    console.log('> Compilación de producción completada con éxito.');
   } catch (err) {
-    console.error('> Error durante la compilación:', err.message);
+    console.error('> Error durante la compilación de Next.js:', err.message || err);
+    process.exit(1);
   }
 }
 
